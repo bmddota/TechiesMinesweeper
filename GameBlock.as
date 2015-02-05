@@ -112,6 +112,8 @@
 				this.addEventListener(MouseEvent.MOUSE_UP, mouseClick, false, 0, true);
 				this.addEventListener(MouseEvent.MOUSE_OVER, mouseOver, false, 0, true);
 				this.addEventListener(MouseEvent.MOUSE_OUT, mouseOut, false, 0, true);
+				
+				tm.questionUnset(xcoord, ycoord);
 			}
 			else if (flag.visible){
 				question.visible = true;

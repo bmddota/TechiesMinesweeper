@@ -38,15 +38,10 @@
 		private var gameData:Object;
 									 
 		private var soundStartup:String = "Tutorial.TaskCompleted";
-		private var soundCountdown:String = "ui.click_forward";
-		private var soundCountdownDone:String = "ui.click_back";
-		private var soundQWE:String = "General.ButtonClick";
-		private var soundInvoke:String = "Creep_Good_Melee.PreAttack";
-		private var soundCastSuccess:String = "Item.PickUpGemShop";
-		private var soundCastFailure:String = "General.CastFail_NoMana";
-		private var soundRefresher:String = "DOTA_Item.Refresher.Activate";
-		private var soundNextInvoke:String = "Shop.PanelUp";
-		private var soundInvokeCooldown:String = "General.CastFail_ItemInCooldown";
+		private var soundClick:String = "General.ButtonClick";
+		private var soundRightClick:String = "General.ButtonClickRelease";
+		private var soundBomb:String = "tutorial_bridge_fall"; //"Frostivus.PointScored.Enemy"; //"terrorblade_arcana.stinger.respawn";
+		private var soundWon:String = "Game.HappyBirthday"; // "Frostivus.PointScored.Team";
 		private var soundEnd:String = "crowd.lv_01";
 		private var soundEndNewBest:String = "crowd.lv_04";
 		
@@ -442,6 +437,8 @@
 			minesDisplay = 0;
 			updateMinesDisplay();
 			
+			globals.GameInterface.PlaySound(soundWon);
+			
 			gameClip.resultsButton.visible = true;
 			gameClip.retryButton.visible = false;
 			gameClip.mainmenuButton.visible = false;
@@ -585,6 +582,7 @@
 				gameTimer.start();
 			}
 			
+			globals.GameInterface.PlaySound(soundClick);
 			uncoverBlock(gb);
 			
 			if (blanksToGo <= 0){
@@ -609,14 +607,20 @@
 			trace("flag Set");
 			trace(xcoord + " -- " + ycoord);
 			
+			globals.GameInterface.PlaySound(soundRightClick);
 			minesDisplay--;
 			updateMinesDisplay();
+		}
+		
+		public function questionUnset(xcoord:int, ycoord:int){
+			globals.GameInterface.PlaySound(soundRightClick);
 		}
 		
 		public function flagUnset(xcoord:int, ycoord:int){
 			trace("flag Unset");
 			trace(xcoord + " -- " + ycoord);
 			
+			globals.GameInterface.PlaySound(soundRightClick);
 			minesDisplay++;
 			updateMinesDisplay();
 		}
@@ -624,6 +628,8 @@
 		private function lostGame(){
 			if (gameTimer != null)
 				gameTimer.stop();
+				
+			globals.GameInterface.PlaySound(soundBomb);
 			gameClip.techiesFace.visible = true;
 			gameClip.clockTime.visible = false;
 			revealAll();
