@@ -1,0 +1,21 @@
+"lang"
+{
+	"Language"		"Portuguese"
+	"Tokens"
+	{		
+		"minigame_title"				"CAMPO MINADO DO TECHIES"
+		"beginner"				      "INICIANTE"
+    "intermediate"          "INTERMEDIÁRIO"
+    "expert"                "AVANÇADO"
+    "custom"                "CUSTOMIZADO"
+    "submit"                "ENVIAR"
+    "retry"                 "JOGAR NOVAMENTE"
+    "main_menu"             "MENU PRINCIPAL"
+    "results"               "RESULTADOS"
+    "submit"                "ENVIAR"
+    "submitted"             "ENVIADO!"
+    "best_time"             "Melhor:"
+    "clock_time"            "Relógio:"
+    "instructions"          "Encontre todas as minas do Techies!"
+	}
+}
