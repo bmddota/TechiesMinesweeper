@@ -1,0 +1,21 @@
+"lang"
+{
+	"Language"                "french"
+	"Tokens"
+	{
+		"minigame_title"        "DEMINEUR TECHIES"
+		"beginner"              "DEBUTANT"
+		"intermediate"          "MOYEN"
+		"expert"                "EXPERT"
+		"custom"                "PERSONNALISE"
+		"submit"                "ENVOYER"
+		"retry"                 "REESSAYER"
+		"main_menu"             "MENU"
+		"results"               "RESULTATS"
+		"submit"                "ENVOYER"
+		"submitted"             "ENVOYE !"
+		"best_time"             "Meilleur :"
+		"clock_time"            "Temps :"
+		"instructions"          "Trouve toutes les Mines de Techies !"
+	}
+}
