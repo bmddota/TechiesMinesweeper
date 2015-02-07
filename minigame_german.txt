@@ -1,0 +1,21 @@
+"lang"
+{
+	"Language"      "German"
+	"Tokens"
+	{
+		"minigame_title"        "TECHIES MINESWEEPER"
+		"beginner"              "ANFÄNGER"
+		"intermediate"          "NORMAL"
+		"expert"                "FORTGESCHRITTEN"
+		"custom"                "PERSONALISIERT"
+		"submit"                "SENDEN"
+		"retry"                 "NEUSTART"
+		"main_menu"             "HAUPTMENÜ"
+		"results"               "ERGEBNISSE"
+		"submit"                "SENDEN"
+		"submitted"             "GESENDET!"
+		"best_time"             "Beststand:"
+		"clock_time"            "Uhr:"
+		"instructions"          "Finde alle Techies-Minen!"
+	}
+}
