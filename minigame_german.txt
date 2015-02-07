@@ -15,7 +15,7 @@
 		"submit"                "SENDEN"
 		"submitted"             "GESENDET!"
 		"best_time"             "Beststand:"
-		"clock_time"            "Uhr:"
+		"clock_time"            "Zeit:"
 		"instructions"          "Finde alle Techies-Minen!"
 	}
 }
