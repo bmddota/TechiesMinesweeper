@@ -17,6 +17,11 @@
 	import flash.net.URLLoader;
 	import flash.text.TextField;
 	import flash.display.IBitmapDrawable;
+	import scaleform.clik.data.DataProvider;
+	import scaleform.clik.events.ListEvent;
+	import flash.text.TextFormatAlign;
+	import flash.text.TextFormat;
+	import flash.utils.getDefinitionByName;
 	
 	public class TechiesMinesweeper extends Minigame {
 		private static const _ZEROS:String = "0000000000000000000000000000000000000000"; // 40 zeros, shorten/expand as you wish
@@ -36,6 +41,8 @@
 		private var consumingInput:Boolean = false;
 		
 		private var gameData:Object;
+		private var leaderboardData:Object = null;
+		private var leaderboardTimer:Timer = null;
 									 
 		private var soundStartup:String = "Tutorial.TaskCompleted";
 		private var soundClick:String = "General.ButtonClick";
@@ -85,6 +92,8 @@
 			menuClip.customButton.textField.text = minigameAPI.translate("#custom");
 			menuClip.customButton.addEventListener(MouseEvent.CLICK, customClick);
 			menuClip.bottomText.text = minigameAPI.translate("#instructions");
+			menuClip.leaderboardButton.textField.text = minigameAPI.translate("#leaderboard");
+			menuClip.leaderboardButton.addEventListener(MouseEvent.CLICK, leaderboardClick);
 			
 			retryClip.submitButton.textField.text = minigameAPI.translate("#submit");
 			retryClip.retryButton.textField.text = minigameAPI.translate("#retry");
@@ -94,9 +103,22 @@
 			retryClip.bestTimeLabel.text = minigameAPI.translate("#best_time");
 			retryClip.clockTimeLabel.text = minigameAPI.translate("#clock_time");
 			
+			var leaderboardProvider = new DataProvider([{"label": "Beginner", "data":"Beginner"},
+				 {"label": "Intermediate", "data":"Intermediate"},
+				 {"label": "Expert", "data":"Expert"}]);
+			
+			leaderboardClip.backButton.textField.text = minigameAPI.translate("#back");
+			leaderboardClip.backButton.addEventListener(MouseEvent.CLICK, backClick);
+			leaderboardClip.dropdown = replaceWithValveComponent(leaderboardClip.dropdown, "ComboBoxSkinned", true);
+			//leaderboardClip.dropdown.rowHeight = 24;
+			leaderboardClip.dropdown.setDataProvider(leaderboardProvider);
+			leaderboardClip.dropdown.setSelectedIndex(0);
+			leaderboardClip.dropdown.menuList.addEventListener(ListEvent.INDEX_CHANGE, leaderboardChange);
+			
 			menuClip.visible = true;
 			gameClip.visible = false;
 			retryClip.visible = false;
+			leaderboardClip.visible = false;
 			
 			minigameAPI.resizeGameWindow();
 			
@@ -633,6 +655,200 @@
 			gameClip.techiesFace.visible = true;
 			gameClip.clockTime.visible = false;
 			revealAll();
+		}
+		
+		private function leaderboardClick(e:MouseEvent){
+			leaderboardClip.visible = true;
+			menuClip.visible = false;
+			leaderboardData = new Object();
+			
+			var leaderboard:String = leaderboardClip.dropdown.menuList.dataProvider[leaderboardClip.dropdown.selectedIndex].label;
+			
+			
+			minigameAPI.getLeaderboardTop(leaderboard, function(obj){
+				trace("CALLBACK SUCCESS");
+				if (obj.error){
+					minigameAPI.log("ERROR: " + obj.error);
+					return;
+				}
+				
+				leaderboardData[leaderboard] = obj;
+				drawLeaderboard(leaderboard);
+			});
+		}
+		
+		private function backClick(e:MouseEvent){
+			leaderboardClip.visible = false;
+			menuClip.visible = true;
+		}
+		
+		private function leaderboardChange(e:Event){
+			var leaderboard:String = leaderboardClip.dropdown.menuList.dataProvider[leaderboardClip.dropdown.selectedIndex].label;
+			trace(leaderboard);
+			
+			if (leaderboardData[leaderboard] == null){
+				minigameAPI.getLeaderboardTop(leaderboard, function(obj){
+					trace("CALLBACK SUCCESS");
+					if (obj.error){
+						minigameAPI.log("ERROR: " + obj.error);
+						return;
+					}
+					
+					leaderboardData[leaderboard] = obj;
+					drawLeaderboard(leaderboard);
+				});
+				return;
+			}
+			
+			drawLeaderboard(leaderboard);
+		}
+		
+		private function drawLeaderboard(board:String, refresh:Boolean = true){
+			var i:int = 0;
+			for (i = leaderboardClip.left.numChildren-1; i>=0; i--){
+				leaderboardClip.left.removeChildAt(i);
+			}
+			for (i = leaderboardClip.right.numChildren-1; i>=0; i--){
+				leaderboardClip.right.removeChildAt(i);
+			}
+			
+			var data:Object = leaderboardData[board];
+			var lab:TextField;
+			var val:TextField;
+			var mc:MovieClip;
+			
+			if (data.length == null || data.length == 0){
+				lab = createTextField(18);
+				lab.text = "NO ENTRIES";
+				leaderboardClip.left.addChild(lab)
+				return;
+			}
+			
+			var ypos:Number = 2;
+			
+			for (i = 0; i<data.length && i<10; i++){
+				mc = new MovieClip();
+				mc.x = 2;
+				mc.width = 16;
+				mc.y = ypos + 4;
+				mc.height = 16;
+				mc.visible = true;
+				globals.LoadImage("img://[S" + data[i].user_id32 + "]", mc, false); mc.width = 16; mc.height = 16;
+				
+				if (data[i].user_id32 == minigameAPI.getUserID())
+					lab = createTextField(18, 0xFACC2E);
+				else
+					lab = createTextField(18, 0x00FF00);
+				lab.x = 20;
+				lab.width = 162;
+				lab.y = ypos;
+				lab.text = (data[i].user_name) ? data[i].user_name : data[i].user_id32;
+				
+				val = createTextField(18, 0xFFFFFF, TextFormatAlign.RIGHT);
+				val.x = 185;
+				val.width = 65;
+				val.y = ypos;
+				val.text = String(int(data[i].highscore_value / 100.0)) + "." + String(Math.abs(data[i].highscore_value % 100));
+				
+				leaderboardClip.left.addChild(mc);
+				leaderboardClip.left.addChild(lab);
+				leaderboardClip.left.addChild(val);
+				
+				ypos += 30;
+			}
+			
+			ypos = 2;
+			for (i = 10; i<data.length; i++){
+				mc = new MovieClip();
+				mc.x = 2;
+				mc.width = 16;
+				mc.y = ypos + 4;
+				mc.height = 16;
+				mc.visible = true;
+				globals.LoadImage("img://[S" + data[i].user_id32 + "]", mc, false); mc.width = 16; mc.height = 16;
+				
+				if (data[i].user_id32 == minigameAPI.getUserID())
+					lab = createTextField(18, 0xFACC2E);
+				else
+					lab = createTextField(18, 0x00FF00);
+				lab.x = 20;
+				lab.width = 162;
+				lab.y = ypos;
+				lab.text = (data[i].user_name) ? data[i].user_name : data[i].user_id32;
+				
+				val = createTextField(18, 0xFFFFFF, TextFormatAlign.RIGHT);
+				val.x = 185;
+				val.width = 65;
+				val.y = ypos;
+				val.text = String(int(data[i].highscore_value / 100.0)) + "." + String(Math.abs(data[i].highscore_value % 100));
+				
+				leaderboardClip.right.addChild(mc);
+				leaderboardClip.right.addChild(lab);
+				leaderboardClip.right.addChild(val);
+				
+				ypos += 30;
+			}
+			
+			if (refresh){
+				var fun:Function = (function(){return function(e:TimerEvent){
+					trace("timer: ");
+					drawLeaderboard(board, false);
+					leaderboardTimer = null;
+				};})();
+				
+				if (leaderboardTimer != null)
+					leaderboardTimer.stop();
+				leaderboardTimer = new Timer(50,1);
+				leaderboardTimer.addEventListener(TimerEvent.TIMER, fun);
+				leaderboardTimer.start();
+			}
+		}
+		
+		public function replaceWithValveComponent(mc:MovieClip, type:String, keepDimensions:Boolean = false, addAt:int = -1) : MovieClip {
+			var parent = mc.parent;
+			var oldx = mc.x;
+			var oldy = mc.y;
+			var oldwidth = mc.width;
+			var oldheight = mc.height;
+			
+			var newObjectClass = getDefinitionByName(type);
+			var newObject = new newObjectClass();
+			newObject.x = oldx;
+			newObject.y = oldy;
+			if (keepDimensions) {
+				newObject.width = oldwidth;
+				newObject.height = oldheight;
+			}
+			
+			parent.removeChild(mc);
+			if (addAt == -1)
+				parent.addChild(newObject);
+			else
+				parent.addChildAt(newObject, 0);
+			
+			return newObject;
+		}
+		
+		public function createTextField(size:uint = 18, color:uint = 0xFFFFFF, align:String = TextFormatAlign.LEFT) : TextField{
+			var tf:TextFormat = globals.Loader_chat.movieClip.chat_main.chat.ChatInputBox.textField.getTextFormat();
+			var field:TextField = new TextField();
+			field.height = size + 4;
+			field.width = 200;
+
+			tf.size = size;
+			tf.color = color;
+			tf.align = align;
+			//tf.font = "$TextFont*"; // Dunno what do on this
+			field.setTextFormat(tf);
+			field.defaultTextFormat = tf;
+			field.autoSize = "none";
+			field.maxChars = 0;
+			//field.type = TextFieldType.DYNAMIC;
+			
+			field.visible = true;
+			field.text = "";
+			
+			return field;
 		}
 		
 		/*
